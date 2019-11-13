@@ -31,25 +31,17 @@ namespace SqlServerTestApp
                 MessageBox.Show("Connection error! Some required fields not filled.", "Connection error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            SqlConnection connection = GetDBConnection(datasource, database, username, userpass);
-            
-            if(DBConnectionService.IsSqlConnectionWorks(connection))
+            if(DBConnectionService.SetSqlConnection(GetDBConnectionString(datasource, database, username, userpass)))
             {
-                MessageBox.Show("Connection passed!", "Connection passed", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Passed!");
+            }
 
-            }
-            else
-            {
-                MessageBox.Show("Ошибка!", "Connection error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
         }
 
-        public static SqlConnection GetDBConnection(string datasource, string database, string username, string password)
+        public string GetDBConnectionString(string datasource, string database, string username, string password)
         {
-            string connString = @"Data Source=" + datasource + ";Initial Catalog="
+            return "Data Source=" + datasource + ";Initial Catalog="
                         + database + ";Persist Security Info=True;User ID=" + username + ";Password=" + password;
-            SqlConnection conn = DBConnectionService.GetSqlConnection(connString);
-            return conn;
         }
     }
 }

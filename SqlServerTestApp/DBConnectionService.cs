@@ -3,51 +3,126 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 
 namespace SqlServerTestApp
 {
     public static class DBConnectionService
     {
-        public static string ConnectionString { get; set; }
+        public static string ConnectionString { get; set; } = "";
+        public static SqlConnection Connection { get; set; } = new SqlConnection();
 
-        public static SqlConnection GetSqlConnection(string connectionString)
+        public static bool SetSqlConnection(string connectionString)
         {
             ConnectionString = connectionString;
-            return new SqlConnection(connectionString);
+            Connection.ConnectionString = ConnectionString;
+            if(!IsSqlConnectionWorks())
+            {
+                Connection.ConnectionString = "";
+                return false;
+            }
+            return true;
         }
 
-        public static bool IsSqlConnectionWorks(SqlConnection sqlConnection)
+        private static void ParseError(string message)
+        {
+            MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        private static void OpenConnection()
+        {
+            Connection.Open();
+        }
+
+        private static void CloseConnection(bool dispose = false)
+        {
+            Connection.Close();
+            if (dispose)
+            {
+                Connection.Dispose();
+            }
+        }
+
+        public static bool IsSqlConnectionWorks()
         {
             try
             {
-                sqlConnection.Open();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+                OpenConnection();
+                CloseConnection();
                 return true;
             }
-            catch
+            catch (Exception exc)
             {
+                ParseError(exc.Message);
                 return false;
             }
         }
 
-        public static int SendCommandToSqlServer(string command, SqlConnection sqlConnection)
+        public static int? SendCommandToSqlServer(string command)
         {
-            sqlConnection.Open();
-            SqlCommand sqlCommand = new SqlCommand(command, sqlConnection);
-            int rowsCount = sqlCommand.ExecuteNonQuery();
-            sqlConnection.Close();
-            return rowsCount;
+            try
+            {
+                OpenConnection();
+                SqlCommand sqlCommand = new SqlCommand(command, Connection);
+                int rowsCount = sqlCommand.ExecuteNonQuery();
+                CloseConnection();
+                return rowsCount;
+            }
+            catch (Exception exc)
+            {
+                ParseError(exc.Message);
+                return null;
+            }
         }
 
-        public static void SendQueryToSqlServer(string command, SqlConnection sqlConnection)
+
+        public static List<string[]> SendQueryToSqlServer(string command)
         {
-            sqlConnection.Open();
-            SqlCommand sqlCommand = new SqlCommand(command, sqlConnection);
-            SqlDataReader reader = sqlCommand.ExecuteReader();
-            //логика чтения данных
-            reader.Close();
-            sqlConnection.Close();
+            try
+            {
+                OpenConnection();
+                SqlCommand sqlCommand = new SqlCommand(command, Connection);
+                SqlDataReader reader = sqlCommand.ExecuteReader();
+                List<string[]> list = new List<string[]>();
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        int count = reader.FieldCount;
+                        string[] array = new string[count];
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            array[i] = reader[i].ToString();
+                        }
+                        list.Add(array);
+                    }
+                }
+                reader.Close();
+                CloseConnection();
+                return list;
+            }
+            catch (Exception exc)
+            {
+                ParseError(exc.Message);
+                return null;
+            }
+        }
+
+        public static object SendScalarQueryToSqlServer(string command)
+        {
+            try
+            {
+                OpenConnection();
+                SqlCommand sqlCommand = new SqlCommand(command, Connection);
+                object data = sqlCommand.ExecuteScalar();
+                CloseConnection();
+                return data;
+            }
+            catch (Exception exc)
+            {
+                ParseError(exc.Message);
+                return null;
+            }
         }
     }
 }
