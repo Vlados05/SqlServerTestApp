@@ -116,6 +116,7 @@
             // 
             // DBConnectionForm
             // 
+            this.AcceptButton = this.connectButton;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(453, 260);
@@ -130,7 +131,9 @@
             this.Controls.Add(this.label1);
             this.Name = "DBConnectionForm";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "DBConnectionForm";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.DBConnectionForm_FormClosed);
             this.ResumeLayout(false);
             this.PerformLayout();
 

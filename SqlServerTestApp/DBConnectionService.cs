@@ -9,8 +9,8 @@ namespace SqlServerTestApp
 {
     public static class DBConnectionService
     {
-        public static string ConnectionString { get; set; } = "";
-        public static SqlConnection Connection { get; set; } = new SqlConnection();
+        private static string ConnectionString { get; set; } = "";
+        private static SqlConnection Connection { get; set; } = new SqlConnection();
 
         public static bool SetSqlConnection(string connectionString)
         {
@@ -54,6 +54,7 @@ namespace SqlServerTestApp
             catch (Exception exc)
             {
                 ParseError(exc.Message);
+                CloseConnection();
                 return false;
             }
         }
@@ -71,11 +72,11 @@ namespace SqlServerTestApp
             catch (Exception exc)
             {
                 ParseError(exc.Message);
+                CloseConnection();
                 return null;
             }
         }
-
-
+        
         public static List<string[]> SendQueryToSqlServer(string command)
         {
             try
@@ -104,6 +105,7 @@ namespace SqlServerTestApp
             catch (Exception exc)
             {
                 ParseError(exc.Message);
+                CloseConnection();
                 return null;
             }
         }
@@ -121,6 +123,7 @@ namespace SqlServerTestApp
             catch (Exception exc)
             {
                 ParseError(exc.Message);
+                CloseConnection();
                 return null;
             }
         }

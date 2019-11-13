@@ -16,32 +16,44 @@ namespace SqlServerTestApp
         public DBConnectionForm()
         {
             InitializeComponent();
-
         }
 
         private void connectButton_Click(object sender, EventArgs e)
         {
             string datasource = serverBox.Text;
             string database = dbNameBox.Text;
-            string username = usernameBox.Text;
+            string username = usernameBox.Text ?? "";
             string userpass = userpassBox.Text ?? "";
 
-            if (string.IsNullOrEmpty(datasource) || string.IsNullOrEmpty(database) || string.IsNullOrEmpty(username))
+            if (string.IsNullOrEmpty(datasource) || string.IsNullOrEmpty(database))
             {
                 MessageBox.Show("Connection error! Some required fields not filled.", "Connection error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             if(DBConnectionService.SetSqlConnection(GetDBConnectionString(datasource, database, username, userpass)))
             {
-                MessageBox.Show("Passed!");
+                MessageBox.Show("Passed!", "Connection passed", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                this.Close();
             }
-
         }
 
         public string GetDBConnectionString(string datasource, string database, string username, string password)
         {
-            return "Data Source=" + datasource + ";Initial Catalog="
-                        + database + ";Persist Security Info=True;User ID=" + username + ";Password=" + password;
+            string dataSourceStirng = "Data Source=" + datasource + ";Initial Catalog=" + database + ";Persist Security Info=True;";
+            if (!string.IsNullOrEmpty(username))
+            {
+                dataSourceStirng += "User ID=" + username + ";Password=" + password + ";";
+            }
+            else
+            {
+                dataSourceStirng += "Integrated Security=SSPI;";
+            }
+            return dataSourceStirng;
+        }
+
+        private void DBConnectionForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            this.CloseForm();
         }
     }
 }
